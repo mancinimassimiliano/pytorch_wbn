@@ -14,7 +14,7 @@ Before using the layer, it is necessary to compile the CUDA part. To compile it,
    `python build.py`
 
 
-## Layers available
+## Layers
 Three layers are available:
 * `WBN2d` : the 2D weighted BN counterpart of [BatchNorm2d](https://pytorch.org/docs/stable/_modules/torch/nn/modules/batchnorm.html#BatchNorm2d). It can be initialized specifying an additional parameter `k` denoting the number of latent domains (default 2). As input during the forward pass, for each sample in the batch it takes an additional tensor `w` denoting the probability that the sample belongs to each of the latent domains.
 * `WBN1d` : the 1D weighted BN counterpart of [BatchNorm1d](https://pytorch.org/docs/stable/_modules/torch/nn/modules/batchnorm.html#BatchNorm1d). The initialization and forward pass follows `WBN2d`.
