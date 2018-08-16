@@ -18,7 +18,7 @@ Before using the layer, it is necessary to compile the CUDA part. To compile it,
 Three layers are available:
 * `WBN2d` : the 2D weighted BN counterpart of [BatchNorm2d](https://pytorch.org/docs/stable/_modules/torch/nn/modules/batchnorm.html#BatchNorm2d). It can be initialized specifying an additional parameter `k` denoting the number of latent domains (default 2). As input during the forward pass, for each sample in the batch it takes an additional tensor `w` denoting the probability that the sample belongs to each of the latent domains.
 * `WBN1d` : the 1D weighted BN counterpart of [BatchNorm1d](https://pytorch.org/docs/stable/_modules/torch/nn/modules/batchnorm.html#BatchNorm1d). The initialization and forward pass follows `WBN2d`.
-* `WBN` : the single domain weighted batch norm. This layer is the base component for the previous two. It **does not** take `k` as additional initialization input. Moreover, the tensor `w` given as additional input has a number of element equal to the batch-size and **_must sum to 1_** in the batch dimension. 
+* `WBN` : the single domain weighted batch norm. This layer is the base component for the previous two. It **does not** take `k` as additional initialization input. Moreover, the tensor `w` given as additional input has a number of element equal to the batch-size and **must sum to 1** in the batch dimension. 
 
 ## Usage 
 The layer is initialized as standard BatchNorm except that requires an additional parameter regarding the number of latent domains. 
@@ -32,7 +32,7 @@ Differently from a standard BatchNorm, this layer will receive an additional inp
 
     out = wbn(x, w) 
 
-`w` represents the probability that each sample belongs to each of the latent domains thus it **_must sum to 1_** in the domain dimensions (i.e. dim=1). Notice that for the `WBN` case `w` has dimension Nx1 and **_must sum to 1_** in the batch dimension (i.e. dim=0).
+`w` represents the probability that each sample belongs to each of the latent domains thus it **must sum to 1** in the domain dimensions (i.e. dim=1). Notice that for the `WBN` case `w` has dimension Nx1 and **must sum to 1** in the batch dimension (i.e. dim=0).
 
 
 
