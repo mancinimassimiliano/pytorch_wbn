@@ -3,7 +3,7 @@
 #include <thrust/execution_policy.h>
 
 #include "common.h"
-#include "bn.h"
+#include "wbn.h"
 #include <stdio.h>
 
 /*

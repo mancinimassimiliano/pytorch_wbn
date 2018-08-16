@@ -43,7 +43,7 @@ extern "C" int wbn_mean_var_cuda(const THCudaTensor *x, const THCudaTensor *w, T
   return _wbn_mean_var_cuda(N, C, S, x_data, w_data, mean_data, var_data, stream);
 }
 
-extern "C" int bn_forward_cuda(const THCudaTensor *x, const THCudaTensor *w, const THCudaTensor *mean, const THCudaTensor *var,
+extern "C" int wbn_forward_cuda(const THCudaTensor *x, const THCudaTensor *w, const THCudaTensor *mean, const THCudaTensor *var,
                                const THCudaTensor *weight, const THCudaTensor *bias, THCudaTensor *y, THCudaTensor *z,
                                float eps) {
   cudaStream_t stream = THCState_getCurrentStream(state);
