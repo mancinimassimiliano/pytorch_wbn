@@ -18,8 +18,8 @@ from functions import wbn
 class WBN2d(nn.Module):
     """Weighted Batch Normalization"""
 
-    def __init__(self, k, num_features, eps=1e-5, momentum=0.1, affine=False):
-        """Creates an InPlace Activated Batch Normalization module
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False, k=2):
+        """Creates an Weighted Batch Normalization module
 
         Parameters
         ----------
@@ -33,8 +33,6 @@ class WBN2d(nn.Module):
             Momentum factor applied to compute running statistics as.
         affine : bool
             If `True` apply learned scale and shift transformation after normalization.
-        activation : str
-            Name of the activation functions, one of: `leaky_relu`, `elu` or `none`.
         """
         super(WBN2d, self).__init__()
 	self.k=k
@@ -50,8 +48,9 @@ class WBN2d(nn.Module):
             self.register_parameter('bias', None)
 	self.wbns=nn.ModuleList()
 	for i in range(k):
-		self.wbns.append(WBN(self.num_features))
+		self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
         self.reset_parameters()
+	self.activation="none"
 
     def reset_parameters(self):
         if self.affine:
@@ -74,19 +73,15 @@ class WBN2d(nn.Module):
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
-              ' affine={affine}, activation={activation}'
-        if self.activation == "leaky_relu":
-            rep += ' slope={slope})'
-        else:
-            rep += ')'
+              ' affine={affine}, activation={activation}, k={k})'
         return rep.format(name=self.__class__.__name__, **self.__dict__)
 
 
 class WBN1d(nn.Module):
     """Weighted Batch Normalization"""
 
-    def __init__(self, k, num_features, eps=1e-5, momentum=0.1, affine=True, activation="none"):
-        """Creates an InPlace Activated Batch Normalization module
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, k=2):
+        """Creates an Weighted Batch Normalization module
 
         Parameters
         ----------
@@ -100,8 +95,6 @@ class WBN1d(nn.Module):
             Momentum factor applied to compute running statistics as.
         affine : bool
             If `True` apply learned scale and shift transformation after normalization.
-        activation : str
-            Name of the activation functions, one of: `leaky_relu`, `elu` or `none`.
         """
         super(WBN1d, self).__init__()
 	self.k=k
@@ -109,7 +102,7 @@ class WBN1d(nn.Module):
         self.affine = affine
         self.eps = eps
         self.momentum = momentum
-        self.activation = activation
+        self.activation = "none"
         if self.affine:
             self.weight = nn.Parameter(torch.Tensor(num_features,1,1))
             self.bias = nn.Parameter(torch.Tensor(num_features,1,1))
@@ -118,7 +111,7 @@ class WBN1d(nn.Module):
             self.register_parameter('bias', None)
 	self.wbns=nn.ModuleList()
 	for i in range(k):
-		self.wbns.append(WBN(self.num_features))
+		self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -142,11 +135,7 @@ class WBN1d(nn.Module):
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
-              ' affine={affine}, activation={activation}'
-        if self.activation == "leaky_relu":
-            rep += ' slope={slope})'
-        else:
-            rep += ')'
+              ' affine={affine}, activation={activation}, k={k})'
         return rep.format(name=self.__class__.__name__, **self.__dict__)
 
 
@@ -154,8 +143,8 @@ class WBN1d(nn.Module):
 class WBN(nn.Module):
     """Weighted Batch Normalization"""
 
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False, activation="none"):
-        """Creates an InPlace Activated Batch Normalization module
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False):
+        """Creates an Weighted Batch Normalization module
 
         Parameters
         ----------
@@ -175,7 +164,7 @@ class WBN(nn.Module):
         self.affine = affine
         self.eps = eps
         self.momentum = momentum
-        self.activation = activation
+        self.activation = "none"
         if self.affine:
             self.weight = nn.Parameter(torch.Tensor(num_features))
             self.bias = nn.Parameter(torch.Tensor(num_features))
@@ -198,11 +187,7 @@ class WBN(nn.Module):
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
-              ' affine={affine}, activation={activation}'
-        if self.activation == "leaky_relu":
-            rep += ' slope={slope})'
-        else:
-            rep += ')'
+              ' affine={affine}, activation={activation})'
         return rep.format(name=self.__class__.__name__, **self.__dict__)
 
 
