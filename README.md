@@ -12,6 +12,7 @@ The only requirement for the layer is the [cffi](https://pypi.org/project/cffi/)
 Before using the layer, it is necessary to compile the CUDA part. To compile it, just type:
 
    `sh build.sh`
+
    `python build.py`
 
 
