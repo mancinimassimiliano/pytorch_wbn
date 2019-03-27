@@ -51,7 +51,7 @@ class MultiModel(nn.Module):
         self.wbn2 = wbn_layers.WBN1d(30,k=10, affine=True)
         self.layer3 = nn.Linear(30,5)
         self.compute_weights = nn.Linear(500,10)
-        self.compute_weights.weight.data.fill_(0.001)
+        self.compute_weights.weight.data.fill_(0.1)
         self.compute_weights.bias.data.fill_(0.0)
         
     def forward(self,x):
@@ -71,7 +71,7 @@ out=net(x)
 loss = out.sum()
 loss.backward()
 assert net.layer1.weight.grad is not None
-
+print('WBN1d: OK')
 
 # Test WBN2d grad_flow
 x = torch.FloatTensor(128,20,1,1).uniform_().to('cuda')
@@ -80,7 +80,7 @@ out=net(x)
 loss = out.sum()
 loss.backward()
 assert net.layer1.weight.grad is not None
-
+print('WBN2d: OK')
 
 # Test multiples WBNs grad_flow
 x = torch.FloatTensor(128,20,5,5).uniform_().to('cuda')
@@ -89,3 +89,7 @@ out=net(x)
 loss = out.sum()
 loss.backward()
 assert net.layer1.weight.grad is not None
+print('Multiple WBNs: OK')
+print()
+
+print('All checks have been passed!')
