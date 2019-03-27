@@ -1,7 +1,11 @@
 # pytorch_wbn
 
 This is the PyTorch implementation of the Weighted Batch Normalization layers used in [Boosting Domain Adaptation by Discovering Latent Domains](http://research.mapillary.com/img/publications/CVPR18b.pdf). The layer is composed by a native CUDA implementation plus a PyTorch interface.
-This version has been tested with PyTorch 0.4.1, python 3.6.
+
+This version has been tested on:
+* PyTorch 0.4.1
+* python 3.6
+* cuda 9.2
 
 **Note**: This code have been produced by taking large inspiration from the [In-Place Activated BatchNorm](https://github.com/mapillary/inplace_abn) implementation.
 
