@@ -1,8 +1,9 @@
 # pytorch_wbn
 
 This is the PyTorch implementation of the Weighted Batch Normalization layers used in [Boosting Domain Adaptation by Discovering Latent Domains](http://research.mapillary.com/img/publications/CVPR18b.pdf). The layer is composed by a native CUDA implementation plus a PyTorch interface.
+This version has been tested with PyTorch 0.4.1, python 3.6.
 
-**Note**: This code have been produced by taking inspiration from the [In-Place Activated BatchNorm](https://github.com/mapillary/inplace_abn) implementation.
+**Note**: This code have been produced by taking large inspiration from the [In-Place Activated BatchNorm](https://github.com/mapillary/inplace_abn) implementation.
 
 ## Installation
 The only requirement for the layer is the [cffi](https://pypi.org/project/cffi/) package. It can be easily installed by just typing:
@@ -13,6 +14,11 @@ Before using the layer, it is necessary to compile the CUDA part. To compile it,
    ```
    sh build.sh
    python build.py
+   ```
+
+To check that the installation runs fine, just type:
+   ```
+    python test_wbn.py
    ```
 
 
