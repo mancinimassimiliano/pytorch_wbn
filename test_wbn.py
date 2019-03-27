@@ -39,6 +39,24 @@ class Model1d(nn.Module):
         x = self.wbn(x,F.softmax(w,dim=-1))
         x = self.layer2(F.relu(x))
         return x
+
+# Define a model using WBN1d
+class ModelStd(nn.Module):
+    def __init__(self):
+        super(ModelStd,self).__init__()
+        self.layer1 = nn.Linear(20,100)
+        self.wbn = wbn_layers.WBN(100,affine=True)
+        self.layer2 = nn.Linear(100,5)
+        self.compute_weights = nn.Linear(20,1)
+        self.compute_weights.weight.data.fill_(0.001)
+        self.compute_weights.bias.data.fill_(0.0)
+        
+    def forward(self,x):
+        w = self.compute_weights(x)
+        x = self.layer1(x)
+        x = self.wbn(x,F.softmax(w,dim=0))
+        x = self.layer2(F.relu(x))
+        return x
     
 # Define a model using both
 class MultiModel(nn.Module):
@@ -63,6 +81,17 @@ class MultiModel(nn.Module):
         x = self.wbn2(x,w)
         x = self.layer3(F.relu(x))
         return x
+
+
+# Test WBN1d grad_flow
+x = torch.FloatTensor(128,20).uniform_().to('cuda')
+net = ModelStd().to('cuda')
+out=net(x)
+loss = out.sum()
+loss.backward()
+assert net.layer1.weight.grad is not None
+print('WBN: OK')
+
     
 # Test WBN1d grad_flow
 x = torch.FloatTensor(128,20).uniform_().to('cuda')
