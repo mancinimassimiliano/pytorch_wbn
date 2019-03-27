@@ -40,7 +40,7 @@ class Model1d(nn.Module):
         x = self.layer2(F.relu(x))
         return x
 
-# Define a model using WBN1d
+# Define a model using WBN
 class ModelStd(nn.Module):
     def __init__(self):
         super(ModelStd,self).__init__()
@@ -82,6 +82,30 @@ class MultiModel(nn.Module):
         x = self.layer3(F.relu(x))
         return x
 
+# Define a model using WBN
+class MultiModelStd(nn.Module):
+    def __init__(self):
+        super(MultiModelStd,self).__init__()
+        self.layer1 = nn.Conv2d(20,100,3,3)
+        self.wbn1 = wbn_layers.WBN(100, affine=True)
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.layer2 = nn.Linear(100,30)
+        self.wbn2 = wbn_layers.WBN(30, affine=True)
+        self.layer3 = nn.Linear(30,5)
+        self.compute_weights = nn.Linear(500,1)
+        self.compute_weights.weight.data.fill_(0.1)
+        self.compute_weights.bias.data.fill_(0.0)
+        
+    def forward(self,x):
+        w = F.softmax(self.compute_weights(x.view(x.shape[0],-1)),dim=0)
+        x = self.layer1(x)
+        x = self.wbn1(x,w)
+        x = self.avgpool(x).view(x.shape[0],-1)
+        x = self.layer2(F.relu(x))
+        x = self.wbn2(x,w)
+        x = self.layer3(F.relu(x))
+        return x
+
 
 # Test WBN1d grad_flow
 x = torch.FloatTensor(128,20).uniform_().to('cuda')
@@ -113,12 +137,21 @@ print('WBN2d: OK')
 
 # Test multiples WBNs grad_flow
 x = torch.FloatTensor(128,20,5,5).uniform_().to('cuda')
-net = MultiModel().to('cuda')
+net = MultiModelStd().to('cuda')
 out=net(x)
 loss = out.sum()
 loss.backward()
 assert net.layer1.weight.grad is not None
 print('Multiple WBNs: OK')
+
+# Test multiples WBNs grad_flow
+x = torch.FloatTensor(128,20,5,5).uniform_().to('cuda')
+net = MultiModel().to('cuda')
+out=net(x)
+loss = out.sum()
+loss.backward()
+assert net.layer1.weight.grad is not None
+print('Multiple WBN1/2d: OK')
 print()
 
 print('All checks have been passed!')
