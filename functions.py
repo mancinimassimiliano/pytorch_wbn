@@ -66,7 +66,7 @@ class WBN(autograd.Function):
             # Update running stats
             running_mean.mul_((1 - ctx.momentum)).add_(ctx.momentum * mean)
             running_var.mul_((1 - ctx.momentum)).add_(ctx.momentum * var * n / (n - 1))
-	
+
         else:
             mean, var = running_mean, running_var
 
@@ -78,7 +78,7 @@ class WBN(autograd.Function):
                x, x, ctx.eps)
 
         # Output
-	ctx.mean = mean
+        ctx.mean = mean
         ctx.var = var
         ctx.save_for_backward(x, w, weight, bias, running_mean, running_var)
         ctx.mark_dirty(x)
@@ -94,8 +94,7 @@ class WBN(autograd.Function):
             dx = dz.new().resize_as_(dz).zero_()
         else:
             dx = None
-
-	if ctx.needs_input_grad[1]:
+        if ctx.needs_input_grad[1]:
             dw = dz.new().resize_as_(w).zero_()
         else:
             dw = None

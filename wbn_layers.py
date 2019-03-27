@@ -35,7 +35,7 @@ class WBN2d(nn.Module):
             If `True` apply learned scale and shift transformation after normalization.
         """
         super(WBN2d, self).__init__()
-	self.k=k
+        self.k=k
         self.num_features = num_features
         self.affine = affine
         self.eps = eps
@@ -46,11 +46,11 @@ class WBN2d(nn.Module):
         else:
             self.register_parameter('weight', None)
             self.register_parameter('bias', None)
-	self.wbns=nn.ModuleList()
-	for i in range(k):
-		self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
+        self.wbns=nn.ModuleList()
+        for i in range(k):
+		          self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
         self.reset_parameters()
-	self.activation="none"
+        self.activation="none"
 
     def reset_parameters(self):
         if self.affine:
@@ -58,18 +58,17 @@ class WBN2d(nn.Module):
             self.bias.data.zero_()
 
     def forward(self, x, ws):
-	 y=x*0.
-	 for i,wbn_component in enumerate(self.wbns):
-	    w=ws[:,i].clone()
-	    s=w.sum()*x.shape[2]*x.shape[3]
-	    wn=w/s
-	    wr=w.view(-1, 1,1,1)
+        y=x*0.
+        for i,wbn_component in enumerate(self.wbns):
+            w=ws[:,i].clone()
+            s=w.sum()*x.shape[2]*x.shape[3]
+            wn=w/s
+            wr=w.view(-1, 1,1,1)
             y+=wr*wbn_component(x.clone(), wn)
-	  
-	 if self.affine:
-         	return self.weight*y+self.bias
-	 else:
-		return y
+        if self.affine:
+            return self.weight*y+self.bias
+        else:
+            return y
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
@@ -97,22 +96,22 @@ class WBN1d(nn.Module):
             If `True` apply learned scale and shift transformation after normalization.
         """
         super(WBN1d, self).__init__()
-	self.k=k
+        self.k=k
         self.num_features = num_features
         self.affine = affine
         self.eps = eps
         self.momentum = momentum
-        self.activation = "none"
         if self.affine:
-            self.weight = nn.Parameter(torch.Tensor(num_features,1,1))
-            self.bias = nn.Parameter(torch.Tensor(num_features,1,1))
+            self.weight = nn.Parameter(torch.Tensor(num_features))
+            self.bias = nn.Parameter(torch.Tensor(num_features))
         else:
             self.register_parameter('weight', None)
             self.register_parameter('bias', None)
-	self.wbns=nn.ModuleList()
-	for i in range(k):
-		self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
+        self.wbns=nn.ModuleList()
+        for i in range(k):
+            self.wbns.append(WBN(self.num_features,eps=self.eps,momentum=self.momentum, affine=False))
         self.reset_parameters()
+        self.activation="none"
 
     def reset_parameters(self):
         if self.affine:
@@ -120,18 +119,17 @@ class WBN1d(nn.Module):
             self.bias.data.zero_()
 
     def forward(self, x, ws):
-	 y=x*0.
-	 for i,wbn_component in enumerate(self.wbns):
-	    w=ws[:,i].clone()
-	    s=w.sum()
-	    wn=w/s
-	    wr=w.view(-1, 1)
+        y=x*0.
+        for i,wbn_component in enumerate(self.wbns):
+            w=ws[:,i].clone()
+            s=w.sum()
+            wn=w/s
+            wr=w.view(-1, 1)
             y += wr*wbn_component(x.clone(), wn)
-
-	 if self.affine:
-         	return self.weight*y+self.bias
-	 else:
-		return y
+        if self.affine:
+            return self.weight*y+self.bias
+        else:
+            return y
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
@@ -160,7 +158,7 @@ class WBN(nn.Module):
             Name of the activation functions, one of: `leaky_relu`, `elu` or `none`.
         """
         super(WBN, self).__init__()
-	self.num_features = num_features
+        self.num_features = num_features
         self.affine = affine
         self.eps = eps
         self.momentum = momentum
@@ -183,11 +181,9 @@ class WBN(nn.Module):
             self.bias.data.zero_()
 
     def forward(self, x, w):
-        return wbn(x.clone(), w, self.weight, self.bias, autograd.Variable(self.running_mean), autograd.Variable(self.running_var), self.training, self.momentum, self.eps,self.activation)
+        return wbn(x.clone(), w, self.weight, self.bias, self.running_mean, self.running_var, self.training, self.momentum, self.eps,self.activation)
 
     def __repr__(self):
         rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
               ' affine={affine}, activation={activation})'
         return rep.format(name=self.__class__.__name__, **self.__dict__)
-
-
