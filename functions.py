@@ -94,10 +94,10 @@ class WBN(autograd.Function):
             dx = dz.new().resize_as_(dz).zero_()
         else:
             dx = None
-        if ctx.needs_input_grad[1]:
-            dw = dz.new().resize_as_(w).zero_()
-        else:
-            dw = None
+        #if ctx.needs_input_grad[1]:
+        dw = dz.new().resize_as_(w).zero_()
+        #else:
+        #    dw = None
 
         if ctx.needs_input_grad[2]:
             dweight = dz.new_zeros((z.shape[1]))
