@@ -66,7 +66,7 @@ class WBN(autograd.Function):
             # Update running stats
             running_mean.mul_((1 - ctx.momentum)).add_(ctx.momentum * mean)
             running_var.mul_((1 - ctx.momentum)).add_(ctx.momentum * var * n / (n - 1))
-	
+
         else:
             mean, var = running_mean, running_var
 
@@ -78,41 +78,40 @@ class WBN(autograd.Function):
                x, x, ctx.eps)
 
         # Output
-	ctx.mean = mean
+        ctx.mean = mean
         ctx.var = var
-        ctx.save_for_backward(x, w, weight, bias, running_mean, running_var)
-        ctx.mark_dirty(x)
+        ctx.save_for_backward(x, w, weight, bias)
+        ctx.mark_dirty(x, running_mean, running_var)
         return x
 
     @staticmethod
     @once_differentiable
     def backward(ctx, dz):
-        z, w, weight, bias, running_mean, running_var = ctx.saved_tensors
+        z, w, weight, bias = ctx.saved_tensors
         dz = dz.contiguous()
 
         if ctx.needs_input_grad[0]:
             dx = dz.new().resize_as_(dz).zero_()
         else:
             dx = None
-
-	if ctx.needs_input_grad[1]:
+        if ctx.needs_input_grad[1]:
             dw = dz.new().resize_as_(w).zero_()
         else:
             dw = None
 
         if ctx.needs_input_grad[2]:
-            dweight = dz.new().resize_as_(running_mean).zero_()
+            dweight = dz.new_zeros((z.shape[1]))
         else:
             dweight = None
 
         if ctx.needs_input_grad[3]:
-            dbias = dz.new().resize_as_(running_mean).zero_()
+            dbias = dz.new_zeros((z.shape[1]))
         else:
             dbias = None
 
         if ctx.training:
-            edz = dz.new().resize_as_(running_mean)
-            eydz = dz.new().resize_as_(running_mean)
+            edz = dz.new_zeros((z.shape[1]))
+            eydz = dz.new_zeros((z.shape[1]))
             _check_contiguous(z, dz, w, weight, bias, edz, eydz)
             _check(_ext.wbn_edz_eydz_cuda,
                    z, dz,
@@ -121,8 +120,8 @@ class WBN(autograd.Function):
                    edz, eydz, ctx.eps)
         else:
             # TODO: implement CUDA backward for inference mode
-            edz = dz.new().resize_as_(running_mean).zero_()
-            eydz = dz.new().resize_as_(running_mean).zero_()
+            edz = dz.new_zeros((z.shape[1]))
+            eydz = dz.new_zeros((z.shape[1]))
         _check_contiguous(dz, z, w, ctx.mean, ctx.var, weight, bias, edz, eydz, dx, dw, dweight, dbias)
         _check(_ext.wbn_backward_cuda,
                dz, z, w, ctx.mean, ctx.var,
