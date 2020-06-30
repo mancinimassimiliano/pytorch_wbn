@@ -78,16 +78,14 @@ class WBN(autograd.Function):
                x, x, ctx.eps)
 
         # Output
-        ctx.mean = mean
-        ctx.var = var
-        ctx.save_for_backward(x, w, weight, bias)
-        ctx.mark_dirty(x, running_mean, running_var)
+        ctx.save_for_backward(x, w, weight, bias, mean, var)
+        ctx.mark_dirty(x)
         return x
 
     @staticmethod
     @once_differentiable
     def backward(ctx, dz):
-        z, w, weight, bias = ctx.saved_tensors
+        z, w, weight, bias, mean, var = ctx.saved_tensors
         dz = dz.contiguous()
 
         if ctx.needs_input_grad[0]:
@@ -100,18 +98,18 @@ class WBN(autograd.Function):
         #    dw = None
 
         if ctx.needs_input_grad[2]:
-            dweight = dz.new_zeros((z.shape[1]))
+            dweight = dz.new().resize_as_(mean).zero_()
         else:
             dweight = None
 
         if ctx.needs_input_grad[3]:
-            dbias = dz.new_zeros((z.shape[1]))
+            dbias = dz.new().resize_as_(mean).zero_()
         else:
             dbias = None
 
         if ctx.training:
-            edz = dz.new_zeros((z.shape[1]))
-            eydz = dz.new_zeros((z.shape[1]))
+            edz = dz.new().resize_as_(mean)
+            eydz = dz.new().resize_as_(mean)
             _check_contiguous(z, dz, w, weight, bias, edz, eydz)
             _check(_ext.wbn_edz_eydz_cuda,
                    z, dz,
@@ -120,11 +118,11 @@ class WBN(autograd.Function):
                    edz, eydz, ctx.eps)
         else:
             # TODO: implement CUDA backward for inference mode
-            edz = dz.new_zeros((z.shape[1]))
-            eydz = dz.new_zeros((z.shape[1]))
-        _check_contiguous(dz, z, w, ctx.mean, ctx.var, weight, bias, edz, eydz, dx, dw, dweight, dbias)
+            edz = dz.new().resize_as_(mean).zero_()
+            eydz = dz.new().resize_as_(mean).zero_()
+        _check_contiguous(dz, z, w, mean, var, weight, bias, edz, eydz, dx, dw, dweight, dbias)
         _check(_ext.wbn_backward_cuda,
-               dz, z, w, ctx.mean, ctx.var,
+               dz, z, w, mean, var,
                weight if weight is not None else dz.new(),
                bias if bias is not None else dz.new(),
                edz, eydz,
